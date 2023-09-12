@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PictoLex - remember words with images</title>
+  <!-- Font Awesome -->
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    rel="stylesheet"
+  />
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+    rel="stylesheet"
+  />
+  <!-- MDB -->
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.1/mdb.min.css"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/static/css/loading.css">
+</head>
+<body>
+
+<div class="container mt-4">
+  <div style="display: flex; align-content: center">
+    <h1 class="mb-4">PictoLex</h1>
+    <p style="color: grey; margin-left: 10px" class="display-6">- remember words with images</p>
+  </div>
+  <h2>Word List</h2>
+  <form id="wordAddForm" onsubmit="return false;">
+    <div class="mb-3 d-flex">
+        <label for="wordInput"></label><input type="text" class="form-control" id="wordInput" placeholder="Enter a word">
+      <button type="button" class="btn btn-success ms-2" id="addWord">Add</button>
+    </div>
+  </form>
+
+  <ul id="wordList" class="list-group mb-3"></ul>
+  <button type="submit" class="btn btn-primary" id="submitWords">Submit List</button>
+
+    <!-- Results will go here -->
+    <div id="results" style="height: 40px;"></div>
+</div>
+
+
+<script>
+document.getElementById('addWord').addEventListener('click', () => {
+  const wordInput = document.getElementById('wordInput');
+  const wordList = document.getElementById('wordList');
+
+  if (wordInput.value.trim() !== '') {
+    const li = document.createElement('li');
+    li.className = 'list-group-item';
+    li.textContent = wordInput.value.trim();
+
+    wordList.appendChild(li);
+    wordInput.value = ''; // Clear the input
+  }
+});
+
+document.getElementById('submitWords').addEventListener('click', async () => {
+    // apply loading animation to results div
+    document.getElementById('results').innerHTML = '<div class="circles-to-rhombuses-spinner" style="left: 50%; transform: translate(-50%, 0);"><div class="circle"></div><div class="circle"></div><div class="circle"></div></div>'
+    const wordListItems = document.querySelectorAll('#wordList li');
+    const resultsDiv = document.getElementById('results');
+    let wordList = []
+    for (let item of wordListItems) {
+        wordList.push(item.textContent)
+    }
+    // call api
+    const options = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(wordList)
+    }
+    const res = await fetch("{{ url_for("request_images_api") }}", options)
+    const resJson = await res.json()
+    if (res.status === 400) {
+        resultsDiv.innerHTML = '<div class="alert alert-danger" role="alert">There was a glitch. Please try again.</div>'
+        return
+    }
+    resultsDiv.innerHTML = '';  // Clear loading animations
+    resultsDiv.setAttribute("style", "")
+
+    for (const [word, images] of Object.entries(resJson)) {
+        // Fetch word definition and image (for now, we'll use placeholders)
+        const definition = `Definition for ${word}`; // You would replace this with a real API call
+
+        const wordDiv = document.createElement('div');
+        wordDiv.className = 'my-4';
+
+        wordDiv.innerHTML = `
+            <h4>${word}</h4>
+            <p>${definition}</p>
+        `;
+        for (let image of images) {
+            const imageElm = document.createElement("img")
+            imageElm.alt = image[1]
+            imageElm.src = image[0]
+            imageElm.className = "img-fluid mb-3 mr-3 ml-3"
+            imageElm.style.width = "600px"
+            wordDiv.appendChild(imageElm)
+        }
+        resultsDiv.appendChild(wordDiv);
+    }
+});
+
+</script>
+<!-- MDB -->
+<script
+  type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.1/mdb.min.js"
+></script>
+</body>
+</html>

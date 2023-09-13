@@ -1,0 +1,19 @@
+{
+  "lang": "ja-jp",
+  "name": "PictoLex",
+  "short_name": "PictoLex",
+  "theme_color": "#fbfbfb",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "http://100.96.64.113/",
+  "description": "Remember vocabulary with pictures.",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/static/img/app_icon.webp",
+      "sizes": "512x512",
+      "type": "image/webp"
+    }
+  ]
+}

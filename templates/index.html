@@ -20,6 +20,25 @@
     rel="stylesheet"
   />
   <link rel="stylesheet" href="/static/css/loading.css">
+  <style>
+        .image-container img {
+            display: none;  /* Default is to hide all images */
+        }
+
+        .image-container img.active {
+            display: block;  /* Show active image */
+        }
+
+        /* Media query for wider screens */
+        @media screen and (min-width: 767px) {
+            .image-container img {
+                display: block;  /* Show all images on wider screens */
+            }
+            .image-selector {
+                display: none;  /* Hide the buttons on wider screens */
+            }
+        }
+    </style>
   <!-- PWA manifest.json -->
   <link rel="manifest" href="/static/manifest.json">
 </head>
@@ -47,70 +66,9 @@
 
 
 <script>
-document.getElementById('addWord').addEventListener('click', () => {
-  const wordInput = document.getElementById('wordInput');
-  const wordList = document.getElementById('wordList');
-
-  if (wordInput.value.trim() !== '') {
-    const li = document.createElement('li');
-    li.className = 'list-group-item';
-    li.textContent = wordInput.value.trim();
-
-    wordList.appendChild(li);
-    wordInput.value = ''; // Clear the input
-  }
-});
-
-document.getElementById('submitWords').addEventListener('click', async () => {
-    // apply loading animation to results div
-    document.getElementById('results').innerHTML = '<div class="circles-to-rhombuses-spinner" style="left: 50%; transform: translate(-50%, 0);"><div class="circle"></div><div class="circle"></div><div class="circle"></div></div>'
-    const wordListItems = document.querySelectorAll('#wordList li');
-    const resultsDiv = document.getElementById('results');
-    let wordList = []
-    for (let item of wordListItems) {
-        wordList.push(item.textContent)
-    }
-    // call api
-    const options = {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(wordList)
-    }
-    const res = await fetch("{{ url_for("request_images_api") }}", options)
-    const resJson = await res.json()
-    if (res.status === 400) {
-        resultsDiv.innerHTML = '<div class="alert alert-danger" role="alert">There was a glitch. Please try again.</div>'
-        return
-    }
-    resultsDiv.innerHTML = '';  // Clear loading animations
-    resultsDiv.setAttribute("style", "")
-
-    for (const [word, images] of Object.entries(resJson)) {
-        // Fetch word definition and image (for now, we'll use placeholders)
-        const definition = `Definition for ${word}`; // You would replace this with a real API call
-
-        const wordDiv = document.createElement('div');
-        wordDiv.className = 'my-4';
-
-        wordDiv.innerHTML = `
-            <h4>${word}</h4>
-            <p>${definition}</p>
-        `;
-        for (let image of images) {
-            const imageElm = document.createElement("img")
-            imageElm.alt = image[1]
-            imageElm.src = image[0]
-            imageElm.className = "img-fluid mb-3 mr-3 ml-3"
-            imageElm.style.width = "600px"
-            wordDiv.appendChild(imageElm)
-        }
-        resultsDiv.appendChild(wordDiv);
-    }
-});
-
+  const apiEndpoint = '{{ url_for("request_images_api") }}';
 </script>
+<script src="/static/js/main.js"></script>
 <!-- MDB -->
 <script
   type="text/javascript"

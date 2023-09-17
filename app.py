@@ -1,12 +1,17 @@
 import asyncio
-import requests
-import re
-from flask import Flask, redirect, url_for, session, request, render_template
-import urllib.parse
+import os
 import random
+import re
 import string
-import envs
+import urllib.parse
+
+import requests
 from bardapi import Bard
+from flask import Flask, redirect, url_for, session, request, render_template, send_file
+
+import dictionary_api
+import envs
+from anki_deck_generator import AnkiDeck
 
 bard_session = requests.Session()
 bard_session.headers = {
@@ -37,6 +42,7 @@ def before_request():
 
 @app.route('/')
 def index():
+    session["current_wordlist_info"] = {}
     return render_template("index.html")
 
 
@@ -44,9 +50,37 @@ def index():
 def request_images_api():
     words = request.get_json()
     try:
-        return request_bard_images(words), 200
+        res = request_bard_images(words), 200
     except ValueError:
         return "The number of images doesn't match to the number words.", 400
+    session["current_wordlist_info"]["images"] = res
+    return res
+
+
+@app.route('/search-definition')
+def dictionary_api() -> dict[str, list[dict[str, str]]]:
+    words = request.get_json()
+    res = {word: dictionary_api.request(word) for word in words}
+    session["current_wordlist_info"]["dict_info"] = res
+    return res
+
+
+@app.route('/generate-anki-deck')
+def generate_anki_deck_api():
+    selections = request.get_json()
+    anki_deck = AnkiDeck(session["user_id"])
+    for word in selections:
+        selection = selections[word]
+        dict_selection: int = selection["dict"]
+        image_selection: int = selection["image"]
+        dict_info = session["current_wordlist_info"]["dict_info"][word][dict_selection]
+        image = session["current_wordlist_info"]["images"][word][image_selection]
+        anki_deck.add_note(word, dict_info, image[0])
+    path = anki_deck.output()
+    # send back data of the file
+    response = send_file(path, as_attachment=True, download_name="anki_deck.apkg")
+    os.remove(path)
+    return response
 
 
 @app.route('/login')

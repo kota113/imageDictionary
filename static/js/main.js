@@ -30,7 +30,7 @@ document.getElementById('submitWords').addEventListener('click', async () => {
         },
         body: JSON.stringify(wordList)
     }
-    const res = await fetch(apiEndpoint, options)
+    const res = await fetch(requestImagesEndpoint, options)
     const resJson = await res.json()
     if (res.status === 400) {
         resultsDiv.innerHTML = '<div class="alert alert-danger" role="alert">There was a glitch. Please try again.</div>'

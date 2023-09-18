@@ -65,6 +65,7 @@ document.getElementById('submitWords').addEventListener('click', async () => {
             images.forEach((image, index) => {
                 // replace spaces with dashes
                 word = word.replace(/\s+/g, '-').toLowerCase();
+                // todo: fix the bug that the only 1 label can be selected
                 if (index === 0) {
                     imageSelector.innerHTML += `
                         <input type="radio" class="btn-check" name="options" id="option-${word}-${index}" autocomplete="off" checked
@@ -111,6 +112,7 @@ function addEventListenerToLabels() {
             const imageContainer = label.parentElement.parentElement
             const radio = label.previousElementSibling;
             const radios = imageContainer.querySelectorAll('input[type="radio"]');
+            // / todo: Cannot check the target radio button
             radios.forEach((elm) => {
                 elm.checked = false;
             });

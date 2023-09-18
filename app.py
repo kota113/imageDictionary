@@ -12,6 +12,7 @@ from flask import Flask, redirect, url_for, session, request, render_template, s
 import dictionary_api
 import envs
 from anki_deck_generator import AnkiDeck
+from cache import BardResponseCache, DictResponseCache
 
 bard_session = requests.Session()
 bard_session.headers = {
@@ -29,12 +30,14 @@ async_loop = asyncio.get_event_loop()
 bard = Bard(token=envs.BARD_1PSID, session=bard_session)
 app = Flask(__name__)
 app.secret_key = envs.SESSION_SECRET
+bard_response_cache = BardResponseCache()
+dict_response_cache = DictResponseCache()
 # bard = Bard(token=envs.BARD_1PSID)
 
 
 @app.before_request
 def before_request():
-    if request.path in ["/login", "/callback"]:
+    if request.path in ["/login", "/callback", "/static/manifest.json"]:
         return
     if "user_id" not in session:
         return redirect(url_for("login"))
@@ -53,19 +56,19 @@ def request_images_api():
         res = request_bard_images(words), 200
     except ValueError:
         return "The number of images doesn't match to the number words.", 400
-    session["current_wordlist_info"]["images"] = res
+    bard_response_cache.set(session["user_id"], res)
     return res
 
 
-@app.route('/search-definition')
-def dictionary_api() -> dict[str, list[dict[str, str]]]:
+@app.route('/word-lookup', methods=['POST'])
+def search_definition_api() -> dict[str, list[dict[str, str]]]:
     words = request.get_json()
     res = {word: dictionary_api.request(word) for word in words}
-    session["current_wordlist_info"]["dict_info"] = res
+    dict_response_cache.set(session["user_id"], res)
     return res
 
 
-@app.route('/generate-anki-deck')
+@app.route('/generate-anki-deck', methods=['POST'])
 def generate_anki_deck_api():
     selections = request.get_json()
     anki_deck = AnkiDeck(session["user_id"])
@@ -73,8 +76,8 @@ def generate_anki_deck_api():
         selection = selections[word]
         dict_selection: int = selection["dict"]
         image_selection: int = selection["image"]
-        dict_info = session["current_wordlist_info"]["dict_info"][word][dict_selection]
-        image = session["current_wordlist_info"]["images"][word][image_selection]
+        dict_info = dict_response_cache.get(session["user_id"])[word][dict_selection]
+        image = bard_response_cache.get(session["user_id"])[word][image_selection]
         anki_deck.add_note(word, dict_info, image[0])
     path = anki_deck.output()
     # send back data of the file

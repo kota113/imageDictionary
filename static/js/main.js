@@ -1,3 +1,5 @@
+let wordList = []
+
 document.getElementById('addWord').addEventListener('click', () => {
   const wordInput = document.getElementById('wordInput');
   const wordList = document.getElementById('wordList');
@@ -17,7 +19,6 @@ document.getElementById('submitWords').addEventListener('click', async () => {
     document.getElementById('results').innerHTML = '<div class="circles-to-rhombuses-spinner" style="left: 50%; transform: translate(-50%, 0);"><div class="circle"></div><div class="circle"></div><div class="circle"></div></div>'
     const wordListItems = document.querySelectorAll('#wordList li');
     const resultsDiv = document.getElementById('results');
-    let wordList = []
     for (let item of wordListItems) {
         wordList.push(item.textContent)
     }
@@ -40,10 +41,12 @@ document.getElementById('submitWords').addEventListener('click', async () => {
     // apply results to HTML
     resultsDiv.innerHTML = '';  // Clear loading animations
     resultsDiv.removeAttribute("style")
+    await search_words()
 
-    for (const [word, images] of Object.entries(resJson)) {
+    for (let [word, images] of Object.entries(resJson)) {
         // Fetch word definition and image (for now, we'll use placeholders)
         const definition = `Definition for ${word}`; // You would replace this with a real API call
+
 
         const wordDiv = document.createElement('div');
         wordDiv.className = 'my-4';
@@ -58,8 +61,10 @@ document.getElementById('submitWords').addEventListener('click', async () => {
 
         if (images.length > 1) {
             const imageSelector = document.createElement('div');
-            imageSelector.className = 'btn-group mb-3 image-selector';
+            imageSelector.className = 'btn-group mb-3';
             images.forEach((image, index) => {
+                // replace spaces with dashes
+                word = word.replace(/\s+/g, '-').toLowerCase();
                 if (index === 0) {
                     imageSelector.innerHTML += `
                         <input type="radio" class="btn-check" name="options" id="option-${word}-${index}" autocomplete="off" checked
@@ -93,6 +98,7 @@ document.getElementById('submitWords').addEventListener('click', async () => {
         resultsDiv.appendChild(wordDiv);
     }
     addEventListenerToLabels()
+    document.getElementById("downloadAnkiDeck").hidden = false
 });
 
 function addEventListenerToLabels() {
@@ -104,6 +110,11 @@ function addEventListenerToLabels() {
         label.addEventListener('click', () => {
             const imageContainer = label.parentElement.parentElement
             const radio = label.previousElementSibling;
+            const radios = imageContainer.querySelectorAll('input[type="radio"]');
+            radios.forEach((elm) => {
+                elm.checked = false;
+            });
+            radio.checked = true;
             const imageNumber = radio.value
             const childImages = imageContainer.querySelectorAll('img');
             childImages.forEach((img, index) => {
@@ -114,4 +125,50 @@ function addEventListenerToLabels() {
             });
         });
     });
+}
+
+async function search_words() {
+    const options = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(wordList)
+    }
+    const res = await fetch(searchWordsEndpoint, options)
+    const resJson = await res.json()
+    return resJson
+}
+
+document.getElementById('downloadAnkiDeck').addEventListener('click', async () => {
+    await retrieveAnkiDeck()
+})
+
+async function retrieveAnkiDeck() {
+    let choices = {}
+    for (const index in wordList) {
+        let word = wordList[index]
+        // replace spaces with dashes
+        word = word.replace(/\s+/g, '-').toLowerCase();
+        choices[word] = {}
+        const imageChoice = document.querySelector(`input[id^='option-${word}-']:checked`)
+        choices[word]["image"] = Number(imageChoice.value)
+        choices[word]["definition"] = 0
+    }
+    // send choices to backend as JSON
+    const options = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(choices)
+    }
+    const res = await fetch(downloadAnkiDeckEndpoint, options)
+    const resBlob = await res.blob()
+    if (res.status !== 200) {
+        alert("Sorry. There was a glitch. Please try again or wait a few minutes. If the problem persists, please contact us")
+        return
+    }
+    // download the deck
+    download("anki_deck.apkg", resBlob)
 }

@@ -28,19 +28,9 @@
         .image-container img.active {
             display: block;  /* Show active image */
         }
-
-        /* Media query for wider screens */
-        @media screen and (min-width: 767px) {
-            .image-container img {
-                display: block;  /* Show all images on wider screens */
-            }
-            .image-selector {
-                display: none;  /* Hide the buttons on wider screens */
-            }
-        }
     </style>
   <!-- PWA manifest.json -->
-  <link rel="manifest" href="/static/manifest.json">
+  <link rel="manifest" href="/manifest.json">
 </head>
 <body>
 
@@ -58,7 +48,15 @@
   </form>
 
   <ul id="wordList" class="list-group mb-3"></ul>
-  <button type="submit" class="btn btn-primary" id="submitWords">Submit List</button>
+  <div class="d-flex">
+    <button type="button" class="btn btn-primary" id="submitWords">Search Images</button>
+    <!-- make button right edged -->
+    <div class="ms-auto">
+      <button type="button" class="btn btn-primary" id="downloadAnkiDeck" hidden="hidden"><i
+          class="fa-solid fa-circle-down"></i></button>
+      <button type="button" class="btn btn-danger" id="clearWords"><i class="fa-solid fa-trash"></i></button>
+    </div>
+  </div>
 
     <!-- Results will go here -->
     <div id="results" style="height: 40px;"></div>
@@ -67,7 +65,8 @@
 
 <script>
   const requestImagesEndpoint = '{{ url_for("request_images_api") }}';
-  const searchWordsEndpoint = '{{ url_for("dictionary_api") }}'
+  const searchWordsEndpoint = '{{ url_for("search_definition_api") }}'
+  const downloadAnkiDeckEndpoint = '{{ url_for("generate_anki_deck_api") }}'
 </script>
 <script src="/static/js/main.js"></script>
 <!-- MDB -->
@@ -75,5 +74,6 @@
   type="text/javascript"
   src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.1/mdb.min.js"
 ></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.min.js"></script>
 </body>
 </html>

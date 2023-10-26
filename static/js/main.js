@@ -14,6 +14,13 @@ document.getElementById('addWord').addEventListener('click', () => {
   }
 });
 
+document.getElementById('clearWords').addEventListener('click', () => {
+    document.getElementById('wordList').innerHTML = '';
+    wordList = []
+    document.getElementById("downloadAnkiDeck").hidden = true
+})
+
+
 document.getElementById('submitWords').addEventListener('click', async () => {
     // apply loading animation to results div
     document.getElementById('results').innerHTML = '<div class="circles-to-rhombuses-spinner" style="left: 50%; transform: translate(-50%, 0);"><div class="circle"></div><div class="circle"></div><div class="circle"></div></div>'
@@ -137,8 +144,7 @@ async function search_words() {
         body: JSON.stringify(wordList)
     }
     const res = await fetch(searchWordsEndpoint, options)
-    const resJson = await res.json()
-    return resJson
+    return await res.json()
 }
 
 document.getElementById('downloadAnkiDeck').addEventListener('click', async () => {

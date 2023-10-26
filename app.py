@@ -37,7 +37,7 @@ dict_response_cache = DictResponseCache()
 
 @app.before_request
 def before_request():
-    if request.path in ["/login", "/callback", "/static/manifest.json"]:
+    if request.endpoint in ["login", "callback", "static"]:
         return
     if "user_id" not in session:
         return redirect(url_for("login"))

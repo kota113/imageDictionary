@@ -49,7 +49,7 @@ class AnkiDeck:
 
 
 def _fetch_image(url: str):
-    url_hash = hashlib.md5(url).hexdigest()
+    url_hash = hashlib.sha256(url.encode()).hexdigest()
     is_file_exists, file_path = _check_image_on_local(url_hash)
     if is_file_exists:
         return file_path

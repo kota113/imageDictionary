@@ -6,7 +6,7 @@
   "background_color": "#ffffff",
   "display": "standalone",
   "scope": "/",
-  "start_url": "https://pictolex.alpaca131.com/",
+  "start_url": "https://imagedict.alpaca131.com/",
   "description": "Remember vocabulary with pictures.",
   "orientation": "portrait",
   "icons": [

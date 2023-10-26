@@ -56,7 +56,7 @@ def request_images_api():
         res = request_bard_images(words), 200
     except ValueError:
         return "The number of images doesn't match to the number words.", 400
-    bard_response_cache.set(session["user_id"], res)
+    bard_response_cache.set(session["user_id"], res[0])
     return res
 
 
@@ -74,11 +74,11 @@ def generate_anki_deck_api():
     anki_deck = AnkiDeck(session["user_id"])
     for word in selections:
         selection = selections[word]
-        dict_selection: int = selection["dict"]
-        image_selection: int = selection["image"]
+        dict_selection: int = int(selection["definition"])
+        image_selection: int = int(selection["image"])
         dict_info = dict_response_cache.get(session["user_id"])[word][dict_selection]
-        image = bard_response_cache.get(session["user_id"])[word][image_selection]
-        anki_deck.add_note(word, dict_info, image[0])
+        image = bard_response_cache.get(session["user_id"])[word][image_selection][0]
+        anki_deck.add_note(word, dict_info, image)
     path = anki_deck.output()
     # send back data of the file
     response = send_file(path, as_attachment=True, download_name="anki_deck.apkg")

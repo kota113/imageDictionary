@@ -6,15 +6,20 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import {
   AppBar,
+  BottomNavigation,
+  BottomNavigationAction,
+  Box,
+  Fab,
+  Paper,
+  styled,
+  ThemeProvider,
   Toolbar,
   Typography,
-  Box,
-  BottomNavigation, BottomNavigationAction, Paper, styled, Fab, ThemeProvider,
 } from '@mui/material';
 import {Restore, Search, Settings} from '@mui/icons-material';
 
-import { createTheme } from '@mui/material/styles';
-import {useState, forwardRef} from "react";
+import {createTheme} from '@mui/material/styles';
+import {useState} from "react";
 import {Link as RouterLink, Outlet} from "react-router-dom";
 
 const theme = createTheme({
@@ -55,7 +60,7 @@ function TopBar() {
 
 
 function BottomBar() {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(null);
   return (
       <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}>
         <BottomNavigation

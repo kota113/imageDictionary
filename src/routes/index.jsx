@@ -97,6 +97,7 @@ function ImagesContainer({wordList}) {
 }
 
 function WordList({setImagesContainer}) {
+    /** @type {[string[], Function]} */
     const [wordList, setWordList] = useState([]);
     const textFieldRef = useRef(null);
 

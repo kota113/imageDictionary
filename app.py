@@ -7,7 +7,7 @@ import urllib.parse
 
 import requests
 from bardapi import Bard
-from flask import Flask, redirect, url_for, session, request, render_template, send_file
+from flask import Flask, redirect, url_for, session, request, render_template, send_file, make_response
 
 import dictionary_api
 import envs
@@ -16,13 +16,13 @@ from cache import BardResponseCache, DictResponseCache
 
 bard_session = requests.Session()
 bard_session.headers = {
-            "Host": "bard.google.com",
-            "X-Same-Domain": "1",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
-            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-            "Origin": "https://bard.google.com",
-            "Referer": "https://bard.google.com/",
-        }
+    "Host": "bard.google.com",
+    "X-Same-Domain": "1",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
+    "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+    "Origin": "https://bard.google.com",
+    "Referer": "https://bard.google.com/",
+}
 bard_session.cookies.set("__Secure-1PSID", envs.BARD_1PSID)
 bard_session.cookies.set("__Secure-1PSIDTS", envs.BARD_1PSIDTS)
 bard_session.cookies.set("__Secure-1PSIDCC", envs.BARD_1PSIDCC)
@@ -41,6 +41,12 @@ def before_request():
         return
     if "user_id" not in session:
         return redirect(url_for("login"))
+    if request.method == "OPTIONS":
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
 
 
 @app.route('/')
@@ -51,18 +57,20 @@ def index():
 
 @app.route('/api/request_images', methods=['POST'])
 def request_images_api():
-    words = request.get_json()
+    words = request.get_json()["words"]
     try:
         res = request_bard_images(words), 200
     except ValueError:
         return "The number of images doesn't match to the number words.", 400
     bard_response_cache.set(session["user_id"], res[0])
+    request_response = make_response(res)
+    request_response.headers.add("Access-Control-Allow-Origin", "*")
     return res
 
 
 @app.route('/word-lookup', methods=['POST'])
 def search_definition_api() -> dict[str, list[dict[str, str]]]:
-    words = request.get_json()
+    words = request.get_json()["words"]
     res = {word: dictionary_api.request(word) for word in words}
     dict_response_cache.set(session["user_id"], res)
     return res

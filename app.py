@@ -51,7 +51,6 @@ def before_request():
 
 @app.route('/')
 def index():
-    session["current_wordlist_info"] = {}
     return render_template("index.html")
 
 

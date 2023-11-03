@@ -161,7 +161,7 @@ function WordList({setImagesContainer}) {
                                             </IconButton>
                                         }
                                     >
-                                        <ListItemText ref={textRef} primary={word}/>
+                                        <ListItemText ref={textRef} style={{textAlign: "left"}} primary={word}/>
                                     </ListItem>
                                 )
                             })}

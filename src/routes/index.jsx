@@ -16,7 +16,7 @@ import {Delete} from "@mui/icons-material";
 import {createRef, useEffect, useRef, useState} from "react";
 import PropTypes from "prop-types";
 
-function ImageTabContent(props) {
+function ImageTabPanel(props) {
     const {children, value, index, word, ...other} = props;
 
     return (
@@ -29,19 +29,45 @@ function ImageTabContent(props) {
         >
             {value === index && (
                 <Box sx={{p: 3}}>
-                    <Typography>{children}</Typography>
+                    {children}
                 </Box>
             )}
         </div>
     );
 }
 
-ImageTabContent.propTypes = {
+ImageTabPanel.propTypes = {
     children: PropTypes.node,
     index: PropTypes.number.isRequired,
     value: PropTypes.number.isRequired,
     word: PropTypes.string.isRequired
 };
+
+function ImageTabContent({word, images}) {
+    const [value, setValue] = useState(0);
+
+    function handleChange(event, newValue) {
+        setValue(newValue);
+    }
+
+    return (
+        <>
+            <Typography variant={"h4"}>{word}</Typography>
+            <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
+                <Tabs value={value} onChange={handleChange} aria-label="basic tabs example" word={word}>
+                    <Tab label="Image 1" tabIndex={0} id={`tab-${word}-1`} aria-controls={`tab-panel-${word}-1`}/>
+                    <Tab label="Image 2" tabIndex={1} id={`tab-${word}-2`} aria-controls={`tab-panel-${word}-2`}/>
+                </Tabs>
+            </Box>
+            <ImageTabPanel value={value} index={0} word={word}>
+                <img src={images[0]} alt={"some text"}></img>
+            </ImageTabPanel>
+            <ImageTabPanel value={value} index={1} word={word}>
+                <img src={images[1]} alt={"some text"}></img>
+            </ImageTabPanel>
+        </>
+    )
+}
 
 function ImagesContainer({wordList}) {
     const [images, setImages] = useState({});
@@ -59,37 +85,19 @@ function ImagesContainer({wordList}) {
             setImages(await response.json());
         }).catch((error) => {
             console.log(error);
-            setImages({"word": ["https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png", "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"]});
+            alert("Error occurred while fetching images");
         })
-    }, []);
+    }, [wordList]);
 
-    const [value, setValue] = useState(0);
-
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
-    };
-    return wordList.map((word) => {
+    return Object.keys(images).map((word) => {
         return <>
-            <Typography variant={"h4"}>{word}</Typography>
-            <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
-                <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                    <Tab label="Image 1" tabIndex={0} id={`tab-${word}-1`} aria-controls={`tab-panel-${word}-1`}/>
-                    <Tab label="Image 2" tabIndex={1} id={`tab-${word}-2`} aria-controls={`tab-panel-${word}-2`}/>
-                </Tabs>
-            </Box>
-            <ImageTabContent value={value} index={0} word={word}>
-                Image One
-            </ImageTabContent>
-            <ImageTabContent value={value} index={1} word={word}>
-                Image Two
-            </ImageTabContent>
+            <ImageTabContent word={word} images={images[word]}/>
         </>
     })
 }
 
-function WordList() {
+function WordList({setImagesContainer}) {
     const [wordList, setWordList] = useState([]);
-    const [/**@type imagesContainer {React.ReactNode} */imagesContainer, setImagesContainer] = useState(null);
     const textFieldRef = useRef(null);
 
     function addWord(event) {
@@ -131,7 +139,7 @@ function WordList() {
                     }}>
                     search images
                 </Button>
-                <Button variant={"contained"} color={"error"}><Delete/></Button>
+                <Button variant={"contained"} color={"error"} onClick={() => setWordList([])}><Delete/></Button>
             </div>
             <Box sx={{flexGrow: 1, maxWidth: 752}}>
                 <Grid item xs={12} md={6}>
@@ -160,23 +168,19 @@ function WordList() {
                         </List>
                     </div>
                 </Grid>
-                {imagesContainer}
             </Box>
         </>
     )
 }
 
-function Images() {
-    return (
-        <></>
-    )
-}
 
 export default function SearchPage() {
+    /** @type {[React.ReactNode, Function]} */
+    const [imagesContainer, setImagesContainer] = useState(<></>);
     return (
         <Container style={{marginTop: "0.7rem"}}>
-            <WordList/>
-            <Images/>
+            <WordList setImagesContainer={setImagesContainer}/>
+            {imagesContainer}
         </Container>
     )
 }

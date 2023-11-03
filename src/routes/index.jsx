@@ -100,7 +100,7 @@ function WordList({setImagesContainer}) {
     const [wordList, setWordList] = useState([]);
     const textFieldRef = useRef(null);
 
-    function addWord(event) {
+    function addWord() {
         const word = textFieldRef.current.value;
         if (wordList.includes(word) || word.replaceAll(" ", "") === "") {
             textFieldRef.current.value = "";
@@ -148,7 +148,7 @@ function WordList({setImagesContainer}) {
                             {wordList.map((word) => {
                                 const textRef = createRef();
 
-                                function removeWord(event) {
+                                function removeWord() {
                                     const word = textRef.current.innerText;
                                     setWordList(wordList.filter((w) => w !== word));
                                 }

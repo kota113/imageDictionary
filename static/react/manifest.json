@@ -1,0 +1,16 @@
+{
+  "short_name": "PictoLex",
+  "name": "PictoLex",
+  "description": "A tool to assist vocabulary learning by AI.",
+  "icons": [
+    {
+      "src": "app_icon_resized.webp",
+      "type": "image/webp",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

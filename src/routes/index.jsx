@@ -73,7 +73,7 @@ function ImagesContainer({wordList}) {
     const [images, setImages] = useState({});
 
     useEffect(() => {
-        fetch("http://127.0.0.1:5000/api/request_images", {
+        fetch("/api/request_images", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

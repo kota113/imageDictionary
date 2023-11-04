@@ -79,7 +79,7 @@ function ImagesContainer({wordList}) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                word: wordList
+                words: wordList
             })
         }).then(async (response) => {
             setImages(await response.json());

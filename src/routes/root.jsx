@@ -69,6 +69,7 @@ function BottomBar() {
           onChange={(event, newValue) => {
             setValue(newValue);
           }}
+          disableRipple={true}
         >
           <BottomNavigationAction label="Recents" icon={<Restore />} component={RouterLink} to={"/history"} />
           <RouterLink to={"/"}>

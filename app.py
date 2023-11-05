@@ -1,18 +1,17 @@
 import asyncio
 import os
 import random
-import re
 import string
 import urllib.parse
 
 import requests
-from bardapi import Bard
 from flask import Flask, redirect, url_for, session, request, render_template, send_file, make_response
 
 import dictionary_api
 import envs
 from anki_deck_generator import AnkiDeck
-from cache import BardResponseCache, DictResponseCache
+from cache import SearchedImagesCache, DictResponseCache
+from get_images import get_images
 
 bard_session = requests.Session()
 bard_session.headers = {
@@ -27,10 +26,9 @@ bard_session.cookies.set("__Secure-1PSID", envs.BARD_1PSID)
 bard_session.cookies.set("__Secure-1PSIDTS", envs.BARD_1PSIDTS)
 bard_session.cookies.set("__Secure-1PSIDCC", envs.BARD_1PSIDCC)
 async_loop = asyncio.get_event_loop()
-bard = Bard(token=envs.BARD_1PSID, session=bard_session)
 app = Flask(__name__)
 app.secret_key = envs.SESSION_SECRET
-bard_response_cache = BardResponseCache()
+searched_images_cache = SearchedImagesCache()
 dict_response_cache = DictResponseCache()
 # bard = Bard(token=envs.BARD_1PSID)
 
@@ -59,10 +57,10 @@ def index():
 def request_images_api():
     words = request.get_json()["words"]
     try:
-        res = request_bard_images(words), 200
+        res = get_images(words), 200
     except ValueError:
         return "The number of images doesn't match to the number words.", 400
-    bard_response_cache.set(session["user_id"], res[0])
+    searched_images_cache.set(session["user_id"], res)
     request_response = make_response(res)
     request_response.headers.add("Access-Control-Allow-Origin", "*")
     return res
@@ -85,7 +83,7 @@ def generate_anki_deck_api():
         dict_selection: int = int(selection["definition"])
         image_selection: int = int(selection["image"])
         dict_info = dict_response_cache.get(session["user_id"])[word][dict_selection]
-        image = bard_response_cache.get(session["user_id"])[word][image_selection][0]
+        image = searched_images_cache.get(session["user_id"])[word][image_selection][0]
         anki_deck.add_note(word, dict_info, image)
     path = anki_deck.output()
     # send back data of the file
@@ -144,31 +142,6 @@ def get_current_line_user():
     response = requests.get('https://api.line.me/v2/profile', headers=headers)
     data = response.json()
     return data
-
-
-def request_bard_images(words: list):
-    images = {}
-    # get 2 words each
-    prompt = ("Give me 2 images which represents each word below. "
-              "Images we see in daily life are desirable.\n"
-              f"words: {', '.join(words)}\n\n")
-    res = bard.get_answer(prompt)
-    content = res['content']
-    # extract all [Image of <description>] from content
-    img_descriptions = re.findall(r'\[Image of .[^]]*]', content)
-    img_descriptions = [i.replace('[Image of ', '').replace(']', '') for i in img_descriptions]
-
-    if len(res["images"]) != len(img_descriptions):
-        raise Exception("The number of images and descriptions are different.")
-    if len(res["images"]) % len(words) != 0:
-        raise ValueError("Number of images doesn't match to the number words.")
-
-    images_per_word: int = len(res["images"]) // len(words)
-    for i in range(len(words)):
-        images[words[i]] = []
-        for image in res["images"][i * images_per_word:(i + 1) * images_per_word]:
-            images[words[i]].append([image, img_descriptions.pop(0)])
-    return images
 
 
 if __name__ == '__main__':

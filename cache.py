@@ -1,4 +1,4 @@
-class BardResponseCache:
+class SearchedImagesCache:
     def __init__(self):
         self.cache = {}
 

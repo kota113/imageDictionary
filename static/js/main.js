@@ -36,7 +36,7 @@ document.getElementById('submitWords').addEventListener('click', async () => {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify(wordList)
+        body: JSON.stringify({words: wordList})
     }
     const res = await fetch(requestImagesEndpoint, options)
     const resJson = await res.json()
@@ -141,7 +141,7 @@ async function search_words() {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify(wordList)
+        body: JSON.stringify({words: wordList})
     }
     const res = await fetch(searchWordsEndpoint, options)
     return await res.json()

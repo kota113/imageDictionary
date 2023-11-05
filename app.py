@@ -13,24 +13,11 @@ from anki_deck_generator import AnkiDeck
 from cache import SearchedImagesCache, DictResponseCache
 from get_images import get_images
 
-bard_session = requests.Session()
-bard_session.headers = {
-    "Host": "bard.google.com",
-    "X-Same-Domain": "1",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
-    "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-    "Origin": "https://bard.google.com",
-    "Referer": "https://bard.google.com/",
-}
-bard_session.cookies.set("__Secure-1PSID", envs.BARD_1PSID)
-bard_session.cookies.set("__Secure-1PSIDTS", envs.BARD_1PSIDTS)
-bard_session.cookies.set("__Secure-1PSIDCC", envs.BARD_1PSIDCC)
 async_loop = asyncio.get_event_loop()
 app = Flask(__name__)
 app.secret_key = envs.SESSION_SECRET
 searched_images_cache = SearchedImagesCache()
 dict_response_cache = DictResponseCache()
-# bard = Bard(token=envs.BARD_1PSID)
 
 
 @app.before_request

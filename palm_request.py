@@ -81,6 +81,6 @@ def palm_get_ideas(word: str) -> list[str]:
         f.write(f"word:{word} response: {response.result}\n")
 
     if "Images:" in response.result:
-        return response.result[:response.result.find("Images:")].replace("\n", "")[1:-1].split('", "')
+        return response.result[:response.result.find("Word:")].replace("\n", "")[1:-1].split('", "')
     else:
         return response.result[1:-1].split('", "')

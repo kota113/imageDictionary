@@ -47,7 +47,7 @@ def request_images_api():
         res = get_images(words), 200
     except ValueError:
         return "The number of images doesn't match to the number words.", 400
-    searched_images_cache.set(session["user_id"], res)
+    searched_images_cache.set(session["user_id"], res[0])
     request_response = make_response(res)
     request_response.headers.add("Access-Control-Allow-Origin", "*")
     return res
@@ -58,6 +58,7 @@ def search_definition_api() -> dict[str, list[dict[str, str]]]:
     words = request.get_json()["words"]
     res = {word: dictionary_api.request(word) for word in words}
     dict_response_cache.set(session["user_id"], res)
+    print(res)
     return res
 
 

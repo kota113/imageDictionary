@@ -31,18 +31,20 @@ class AnkiDeck:
             'Image Dictionary'
         )
         self.user_id = user_id
+        self.media_files = []
 
     def add_note(self, word: str, dict_info: dict, image_url: str):
         image_path = _fetch_image(image_url)
         my_note = genanki.Note(
             model=card_model,
-            fields=[word, dict_info["definition"], dict_info.get("synonyms", ""), image_path]
+            fields=[word, dict_info["definition"], ", ".join(dict_info.get("synonyms", "")), image_path]
         )
         self.deck.add_note(my_note)
         # add an image to deck
-        self.deck.media_files = [image_path]
+        self.media_files.append(image_path)
 
     def output(self):
+        self.deck.media_files = self.media_files
         path = f"_temp/anki_deck_{self.user_id}.apkg"
         genanki.Package(self.deck).write_to_file(path)
         return path

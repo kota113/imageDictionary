@@ -1,5 +1,4 @@
 import asyncio
-import os
 import random
 import string
 import urllib.parse
@@ -76,7 +75,8 @@ def generate_anki_deck_api():
     path = anki_deck.output()
     # send back data of the file
     response = send_file(path, as_attachment=True, download_name="anki_deck.apkg")
-    os.remove(path)
+    # todo: problem with deleting file
+    # os.remove(path)
     return response
 
 

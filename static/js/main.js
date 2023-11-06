@@ -171,11 +171,24 @@ async function retrieveAnkiDeck() {
         body: JSON.stringify(choices)
     }
     const res = await fetch(downloadAnkiDeckEndpoint, options)
-    const resBlob = await res.blob()
-    if (res.status !== 200) {
-        alert("Sorry. There was a glitch. Please try again or wait a few minutes. If the problem persists, please contact us")
-        return
-    }
-    // download the deck
-    download("anki_deck.apkg", resBlob)
+    // Get the blob response if the status is 200
+    const resBlob = await res.blob();
+
+    // Create a link element
+    const url = window.URL.createObjectURL(resBlob);
+    const link = document.createElement('a');
+    link.href = url;
+
+    // Set the download attribute to the filename
+    link.setAttribute('download', 'anki_deck.apkg');
+
+    // Append the link to the body
+    document.body.appendChild(link);
+
+    // Programmatically click the link to trigger the download
+    link.click();
+
+    // Clean up by removing the link and revoking the URL
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
 }

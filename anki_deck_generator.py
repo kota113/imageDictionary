@@ -38,16 +38,17 @@ class AnkiDeck:
         my_note = genanki.Note(
             model=card_model,
             fields=[word, dict_info["definition"], ", ".join(dict_info.get("synonyms", "")),
-                    f"<img src='{image_path}'>"]
+                    f"<img src='{image_path.replace('temp/', '')}'>"]
         )
         self.deck.add_note(my_note)
         # add an image to deck
-        self.media_files.append(image_path)
+        self.media_files.append(os.path.abspath(image_path))
 
     def output(self):
-        self.deck.media_files = self.media_files
         path = f"temp/anki_deck_{self.user_id}.apkg"
-        genanki.Package(self.deck).write_to_file(path)
+        package = genanki.Package(self.deck)
+        package.media_files = self.media_files
+        package.write_to_file(path)
         return path
 
 

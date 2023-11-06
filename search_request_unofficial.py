@@ -15,10 +15,10 @@ class GoogleImageScraper:
         url = f"https://www.google.com/search?hl=en&q={query}&tbm=isch"
         response = requests.get(url, headers=self.headers)
         soup = BeautifulSoup(response.text, 'lxml')
-        images = self._parse_image_results(soup, num_images)
-        return images
+        return self._parse_image_results(soup, num_images)
 
-    def _parse_image_results(self, soup, num_images):
+    @staticmethod
+    def _parse_image_results(soup, num_images):
         image_elements = soup.find_all('img', {'src': re.compile('gstatic.com/images')})
         image_links = []
         for element in image_elements[:num_images]:

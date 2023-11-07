@@ -59,7 +59,7 @@ def _fetch_image(url: str):
         return file_path
     # fetch an image as google crawler
     headers = {
-        'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+        'User-Agent': 'Googlebot-Image/1.0'
     }
     response = requests.get(url, headers=headers)
     file_extension = response.headers["Content-Type"].split("/")[1]

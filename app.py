@@ -58,7 +58,8 @@ def search_definition_api() -> dict[str, list[dict[str, str]]]:
     res = {word: dictionary_api.request(word) for word in words}
     dict_response_cache.set(session["user_id"], res)
     print(res)
-    return res
+    return {word: [{"definition": i["definition"], "synonyms": ", ".join(i.get("synonyms", []))} for i in res[word]] for
+            word in res}
 
 
 @app.route('/generate-anki-deck', methods=['POST'])

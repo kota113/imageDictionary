@@ -48,11 +48,18 @@ document.getElementById('submitWords').addEventListener('click', async () => {
     // apply results to HTML
     resultsDiv.innerHTML = '';  // Clear loading animations
     resultsDiv.removeAttribute("style")
-    await search_words()
+    const dictRes = await search_words()
 
     for (let [word, images] of Object.entries(resJson)) {
         // Fetch word definition and image (for now, we'll use placeholders)
-        const definition = `Definition for ${word}`; // You would replace this with a real API call
+        const definitionSelection = document.createElement('select');
+        definitionSelection.className = 'form-select mb-3';
+        definitionSelection.id = `definition-${word}`;
+        definitionSelection.innerHTML = '<option selected>Choose a definition</option>';
+        // {word: [{definition: definition, synonyms: "synonym1, synonym2, ..."}]}
+        for (let [index, item] of Object.entries(dictRes[word])) {
+            definitionSelection.innerHTML += `<option value="${index}">${item["definition"]}</option>`;
+        }
 
 
         const wordDiv = document.createElement('div');
@@ -60,8 +67,8 @@ document.getElementById('submitWords').addEventListener('click', async () => {
 
         wordDiv.innerHTML = `
             <h4>${word}</h4>
-            <p>${definition}</p>
         `;
+        wordDiv.appendChild(definitionSelection);
 
         const imageContainer = document.createElement('div');
         imageContainer.className = 'image-container';
@@ -160,7 +167,7 @@ async function retrieveAnkiDeck() {
         choices[word] = {}
         const imageChoice = document.querySelector(`input[id^='option-${word}-']:checked`)
         choices[word]["image"] = Number(imageChoice.value)
-        choices[word]["definition"] = 0
+        choices[word]["definition"] = Number(document.getElementById(`definition-${word}`).value)
     }
     // send choices to backend as JSON
     const options = {

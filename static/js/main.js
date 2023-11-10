@@ -151,6 +151,10 @@ async function search_words() {
         body: JSON.stringify({words: wordList})
     }
     const res = await fetch(searchWordsEndpoint, options)
+    if (res.status === 404) {
+        alert("There was a typo in your word list. Please try again.")
+        return {}
+    }
     return await res.json()
 }
 

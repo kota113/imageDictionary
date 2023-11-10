@@ -49,6 +49,9 @@ class AnkiDeck:
         package = genanki.Package(self.deck)
         package.media_files = self.media_files
         package.write_to_file(path)
+        # remove all image files
+        for file in self.media_files:
+            os.remove(file)
         return path
 
 

@@ -54,9 +54,12 @@ def request_images_api():
 
 
 @app.route('/word-lookup', methods=['POST'])
-def search_definition_api() -> dict[str, list[dict[str, str]]]:
+def search_definition_api() -> dict[str, list[dict[str, str]]] | tuple[dict[str, str], int]:
     words = request.get_json()["words"]
-    res = {word: dictionary_api.request(word) for word in words}
+    try:
+        res = {word: dictionary_api.request(word) for word in words}
+    except requests.exceptions.HTTPError:
+        return {"error": "Word not found."}, 404
     dict_response_cache.set(session["user_id"], res)
     print(res)
     return {word: [{"definition": i["definition"], "synonyms": ", ".join(i.get("synonyms", []))} for i in res[word]] for

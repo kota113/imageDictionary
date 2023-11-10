@@ -1,10 +1,11 @@
 import asyncio
+import os
 import random
 import string
 import urllib.parse
 
 import requests
-from flask import Flask, redirect, url_for, session, request, render_template, send_file, make_response
+from flask import Flask, redirect, url_for, session, request, render_template, send_file, make_response, abort
 
 import dictionary_api
 import envs
@@ -73,12 +74,18 @@ def generate_anki_deck_api():
         dict_info = dict_response_cache.get(session["user_id"])[word][dict_selection]
         image = searched_images_cache.get(session["user_id"])[word][image_selection][0]
         anki_deck.add_note(word, dict_info, image)
-    path = anki_deck.output()
-    # send back data of the file
-    response = send_file(path, as_attachment=True, download_name="anki_deck.apkg")
+    anki_deck.output()
+    return "success", 200
+
+
+@app.route('/download-anki-deck')
+def download_anki_deck():
+    user_id = session["user_id"]
     # todo: problem with deleting file
     # os.remove(path)
-    return response
+    if not os.path.exists(f"temp/anki_deck_{user_id}.apkg"):
+        return abort(404)
+    return send_file(f"temp/anki_deck_{user_id}.apkg", as_attachment=True, download_name="anki_deck.apkg")
 
 
 @app.route('/login')

@@ -4,9 +4,9 @@ It **uses AI to search adequate images** for the words, and compile them to __An
 
 # Branches
 - /feature/use-palm2  
-  Changed to use official Palm2 api instead of an unofficial API of Google Bard.
+  Changed to use an official Palm2 api, instead of an unofficial API of Google Bard.
 - /feature/react  
-  Use React instead of Bootstrap, to implement a native app ultimately.
+  Use React instead of Bootstrap, to release a native app ultimately using React Native.  
 
 # Technologies behind
 It basically uses Google's AI model, PaLM.

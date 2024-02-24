@@ -68,6 +68,7 @@ def search_definition_api() -> dict[str, list[dict[str, str]]] | tuple[dict[str,
 
 @app.route('/generate-anki-deck', methods=['POST'])
 def generate_anki_deck_api():
+    # todo: handle the case when the user doesn't select to include definitions
     selections = request.get_json()
     anki_deck = AnkiDeck(session["user_id"])
     for word in selections:

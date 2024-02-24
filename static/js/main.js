@@ -21,7 +21,15 @@ document.getElementById('clearWords').addEventListener('click', () => {
 })
 
 
-document.getElementById('submitWords').addEventListener('click', async () => {
+document.getElementById('submitWordsWithDef').addEventListener('click', async () => {
+    await submitBtnListener(true)
+})
+
+document.getElementById('submitWordsWithoutDef').addEventListener('click', async () => {
+    await submitBtnListener(false)
+})
+
+async function submitBtnListener (includeDef) {
     // apply loading animation to results div
     document.getElementById('results').innerHTML = '<div class="circles-to-rhombuses-spinner" style="left: 50%; transform: translate(-50%, 0);"><div class="circle"></div><div class="circle"></div><div class="circle"></div></div>'
     const wordListItems = document.querySelectorAll('#wordList li');
@@ -48,7 +56,7 @@ document.getElementById('submitWords').addEventListener('click', async () => {
     // apply results to HTML
     resultsDiv.innerHTML = '';  // Clear loading animations
     resultsDiv.removeAttribute("style")
-    const dictRes = await search_words()
+    const dictRes = includeDef ? await search_words() : {}
 
     for (let [word, images] of Object.entries(resJson)) {
         // Fetch word definition and image (for now, we'll use placeholders)
@@ -56,9 +64,14 @@ document.getElementById('submitWords').addEventListener('click', async () => {
         definitionSelection.className = 'form-select mb-3';
         definitionSelection.id = `definition-${word}`;
         definitionSelection.innerHTML = '<option selected>Choose a definition</option>';
-        // {word: [{definition: definition, synonyms: "synonym1, synonym2, ..."}]}
-        for (let [index, item] of Object.entries(dictRes[word])) {
-            definitionSelection.innerHTML += `<option value="${index}">${item["definition"]}</option>`;
+        if (includeDef) {
+            // {word: [{definition: definition, synonyms: "synonym1, synonym2, ..."}]}
+            for (let [index, item] of Object.entries(dictRes[word])) {
+                definitionSelection.innerHTML += `<option value="${index}">${item["definition"]}</option>`;
+            }
+        }
+        else {
+            definitionSelection.disabled = true
         }
 
 
@@ -113,7 +126,7 @@ document.getElementById('submitWords').addEventListener('click', async () => {
     }
     addEventListenerToLabels()
     document.getElementById("downloadAnkiDeck").hidden = false
-});
+}
 
 function addEventListenerToLabels() {
     // change image on label click
